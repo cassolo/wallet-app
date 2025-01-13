@@ -1,18 +1,12 @@
 <template>
   <div id="app">
-    <TestApiClient />
+
   </div>
 </template>
 
 
 <script>
-import TestApiClient from './components/TestApiClient.vue';
 
-export default {
-  components: {
-    TestApiClient,
-  },
-};
 </script>
 
 <style>
