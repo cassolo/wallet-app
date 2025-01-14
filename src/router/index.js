@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '../components/LoginView.vue';
 import DashboardView from '../components/DashboardView.vue';
-import NewPurchaseView from '../components/NewPurchaseView.vue';
+import SaleAndPurchaseView from '../components/SaleAndPurchaseView.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', component: LoginView },
   { path: '/dashboard', component: DashboardView},
-  { path: '/new-purchase', component: NewPurchaseView },
+  { path: '/transaction', component: SaleAndPurchaseView}
  
 ];
 

@@ -2,7 +2,8 @@
     <div class="dashboard-container">
       <h1>Dashboard</h1>
       <p>Bienvenido, tu ID es: <strong>{{ userId }}</strong></p>
-      <button @click="$router.push('/new-purchase')">Nueva Compra</button>
+
+      <button @click="$router.push('/transaction')">Nueva Transaccion</button>
     </div>
   </template>
   
