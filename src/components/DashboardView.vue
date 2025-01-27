@@ -4,6 +4,8 @@
       <p>Bienvenido, tu ID es: <strong>{{ userId }}</strong></p>
 
       <button @click="$router.push('/transaction')">Nueva Transaccion</button>
+      <button @click="$router.push('/log')">Ver Historial de Movimientos</button>
+
     </div>
   </template>
   
