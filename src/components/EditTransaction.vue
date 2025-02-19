@@ -3,13 +3,13 @@
     <h1>Editar Transacción</h1>
     <form v-if="transaccion" @submit.prevent="guardarCambios">
       <label for="action">Acción:</label>
-      <select v-model="transaccion.action" id="action" required>
+      <select v-model="transaccion.action" id="action" @change="calcularTotal" required>
         <option value="purchase">Compra</option>
         <option value="sale">Venta</option>
       </select>
 
       <label for="crypto">Criptomoneda:</label>
-      <select v-model="transaccion.crypto_code" id="crypto" required>
+      <select v-model="transaccion.crypto_code" id="crypto" @change="calcularTotal" required>
         <option disabled value="">Seleccione una opción</option>
         <option v-for="moneda in monedas" :key="moneda" :value="moneda">
           {{ moneda.toUpperCase() }}
@@ -18,13 +18,10 @@
 
       <label for="cantidad">Cantidad:</label>
       <input type="number" id="cantidad" v-model.number="transaccion.crypto_amount" min="0.0001" step="0.0001"
-        required />
+        @input="calcularTotal" required />
 
-      <label for="money">Total (ARS):</label>
-      <input type="number" id="money" v-model.number="transaccion.money" min="0.01" step="0.01" required />
-
-      <label for="datetime">Fecha y hora:</label>
-      <input type="text" id="datetime" v-model="transaccion.datetime" placeholder="DD-MM-YYYY hh:mm" required />
+      <p v-if="transaccion.action === 'purchase'">Total a pagar (ARS): {{ total ? `$${total}` : '-' }}</p>
+      <p v-if="transaccion.action === 'sale'">Dinero cobrado (ARS): {{ total ? `$${total}` : '-' }}</p>
 
       <button type="submit">Guardar Cambios</button>
       <button type="button" @click="$router.push('/log')">Cancelar</button>
@@ -36,12 +33,14 @@
 
 <script>
 import apiClient from '../apiClient';
+import axios from 'axios';
 
 export default {
   data() {
     return {
-      transaccion: null, 
-      cambios: {}, 
+      transaccion: null,
+      transaccionOriginal: null,
+      total: null,
       error: null,
       monedas: [
         'BTC', 'ETH', 'USDT', 'USDC', 'DAI', 'UXD', 'USDP', 'WLD',
@@ -53,23 +52,50 @@ export default {
     };
   },
   async created() {
-    const id = this.$route.params.id; 
+    const id = this.$route.params.id;
     try {
       const response = await apiClient.get(`/transactions/${id}`);
-      this.transaccion = response.data;
 
+      if (!response.data) {
+        throw new Error('No se encontró la transacción.');
+      }
+
+      this.transaccion = response.data;
       this.transaccionOriginal = { ...response.data };
 
-
-      const cryptoCode = this.transaccion.crypto_Code.toUpperCase();
+      const cryptoCode = this.transaccion.crypto_code ? this.transaccion.crypto_code.toUpperCase() : '';
       this.transaccion.crypto_code = this.monedas.includes(cryptoCode) ? cryptoCode : '';
 
+      await this.calcularTotal();
     } catch (error) {
       console.error('Error al cargar la transacción:', error);
       this.error = 'No se pudo cargar la transacción.';
     }
   },
   methods: {
+    async calcularTotal() {
+      if (!this.transaccion.crypto_code || this.transaccion.crypto_amount <= 0) {
+        this.total = null;
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `https://criptoya.com/api/satoshitango/${this.transaccion.crypto_code.toLowerCase()}/ars/1`
+        );
+
+        if (this.transaccion.action === 'purchase') {
+          this.total = (response.data.totalAsk * this.transaccion.crypto_amount).toFixed(2);
+        } else if (this.transaccion.action === 'sale') {
+          this.total = (response.data.totalBid * this.transaccion.crypto_amount).toFixed(2);
+        }
+
+        this.transaccion.money = this.total;
+      } catch (error) {
+        console.error('Error al obtener el precio:', error);
+        this.total = null;
+      }
+    },
     async guardarCambios() {
       const id = this.$route.params.id;
 
@@ -86,17 +112,15 @@ export default {
       }
 
       try {
-        await apiClient.patch(`/transactions/${id}`, this.cambios);
+        await apiClient.patch(`/transactions/${id}`, cambios);
         alert('Transacción actualizada con éxito.');
         this.$router.push('/log');
       } catch (error) {
         console.error('Error al guardar los cambios:', error);
         alert('Hubo un problema al guardar los cambios.');
       }
-    }
-
+    },
   },
-  
 };
 </script>
 
