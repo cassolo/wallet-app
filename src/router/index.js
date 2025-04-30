@@ -4,6 +4,7 @@ import DashboardView from '../components/DashboardView.vue';
 import SaleAndPurchaseView from '../components/SaleAndPurchaseView.vue';
 import LogView from '../components/LogView.vue';
 import EditTransaction from '../components/EditTransaction.vue';
+import UserStatus from '../components/UserStatus.vue';
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -12,6 +13,7 @@ const routes = [
   { path: '/transaction', component: SaleAndPurchaseView },
   { path: '/log', component: LogView },
   { path: '/transaction/:id/edit', component: EditTransaction},
+  { path: '/status', component: UserStatus}
 
 ];
 

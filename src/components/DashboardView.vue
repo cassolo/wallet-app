@@ -5,6 +5,7 @@
 
     <button @click="$router.push('/transaction')">Nueva Transaccion</button>
     <button @click="$router.push('/log')">Ver Historial de Movimientos</button>
+    <button @click="$router.push('/status')">Ver estado</button>
 
   </div>
 </template>
